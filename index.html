@@ -69,15 +69,9 @@
                             <span>Stop</span>
                         </button>
                          <button id="flashBtn" class="hidden items-center justify-center p-2.5 font-semibold text-white bg-gray-600 rounded-md shadow-sm hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors">
-                            <!-- Flash ON Icon (Filled Zap) -->
-                            <svg id="flashOnIcon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5" style="display: none;">
-                                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
-                            </svg>
-                            <!-- Flash OFF Icon (Zap-Off) -->
-                            <svg id="flashOffIcon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
-                                <polyline points="12.41 6.75 13 2 10.57 8.51"></polyline>
-                                <polyline points="17.11 8.51 21 12 15.64 12 8 22l3.59-7.49"></polyline>
-                                <line x1="1" y1="1" x2="23" y2="23"></line>
+                            <svg id="flashIcon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
+                                <path id="flashOffPath" d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"></path>
+                                <path id="flashOnPath" d="M13 2 3 14h9l-1 8 10-12h-9l1-8z" fill="currentColor" style="display: none;"></path>
                             </svg>
                             <span class="sr-only">Toggle Flash</span>
                         </button>
@@ -113,5 +107,369 @@ const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzGJy8WInLBIJ
 const SESSION_STORAGE_KEY = 'attendance_records_session_v1';
 const DEBOUNCE_MS = 1500;
 const READER_ID = "reader";
-// A reliable, short "ping" sound in MP3 format
-const BEEP_BASE64 = "SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU2LjQwLjEwMQAAAAAAAAAAAAAA//OEAAAAAAAAAAAAAAAAAAAAAAAASW5mbwAAAA8AAAAEAAABIADAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDV1dXV1dXV1dXV1dXV1dXV1dXV1dXV1dXV6urq6urq6urq6urq6urq6urq6urq6urq6v////////////////////////////////8AAAAATGF2YzU2LjYwAAAAAAAAAAAAAAAAJAAAAAAAAAAAASDs93//nEYAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//MUxAAAAANIAAAAAExBTUUzLjk5LjVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV-d...
+// A reliable, short "plop" sound
+const BEEP_BASE64 = "UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABgAAABkYXRhAgAAAEz/gP5A/0D/UP+0/wD/0f+e/7T/Qf8E/7T/zv/j/+//9/+8/1L/9/+8/87/1P/r/8H/5v/j/57/tP9B/wT/tP/O/+P/7//3/7z/Uv/3/7z/zv/U/+v/wf/m/+P/nv+0/0H/BP+0/87/4//v//f/vP9S//f/vP/O/9T/6//B/+b/4/+e/7T/Qf8E/7T/zv/j/+//9/+8/1L/9/+8/87/1P/r/8H/5v/j/57/tP9B/wT/tP/O/+P/7//3/7z/Uv/3/7z/zv/U/+v/wf/m/+P/nv+0/0H/";
+
+// --- State ---
+let records = [];
+let html5QrCode = null;
+let isScanning = false;
+let isFlashOn = false;
+let lastScannedId = null;
+let lastScannedAt = 0;
+// Note: Global audio object is removed to prevent state issues.
+
+// --- DOM Elements ---
+const bodyEl = document.body;
+const movementSelect = document.getElementById('movementSelect');
+const scanCountEl = document.getElementById('scanCount');
+const startBtn = document.getElementById('startBtn');
+const stopBtn = document.getElementById('stopBtn');
+const flashBtn = document.getElementById('flashBtn');
+const readerEl = document.getElementById('reader');
+const manualInput = document.getElementById('manualInput');
+const manualAddBtn = document.getElementById('manualAddBtn');
+const exportBtn = document.getElementById('exportBtn');
+const messageEl = document.getElementById('message');
+
+// --- THEME/COLOR Functions ---
+function updateThemeColor() {
+    const value = movementSelect.value;
+    
+    // Define color mappings with brighter colors
+    const bodyColorClasses = {
+        '': 'bg-gray-100',
+        'دخول': 'bg-emerald-50',
+        'انصراف': 'bg-blue-50',
+        'انصراف مسائي': 'bg-red-50'
+    };
+
+    const selectColorClasses = {
+         '': ['bg-white', 'text-gray-800', 'border-gray-400', 'focus:ring-emerald-500'],
+        'دخول': ['bg-emerald-500', 'text-white', 'font-semibold', 'border-emerald-600', 'focus:ring-emerald-400'],
+        'انصراف': ['bg-blue-500', 'text-white', 'font-semibold', 'border-blue-600', 'focus:ring-blue-400'],
+        'انصراف مسائي': ['bg-red-500', 'text-white', 'font-semibold', 'border-red-600', 'focus:ring-red-400']
+    };
+
+    // --- List all classes that might be changed for cleanup ---
+    const allBodyClasses = Object.values(bodyColorClasses);
+    const allSelectClasses = [
+        ...Object.values(selectColorClasses).flat(),
+        // Add any legacy classes here to ensure they are removed
+        'border-gray-300', 'border-emerald-500', 'border-blue-500', 'border-red-500' 
+    ];
+
+    // --- Apply new classes ---
+    // 1. Update Body
+    bodyEl.classList.remove(...allBodyClasses);
+    bodyEl.classList.add(bodyColorClasses[value] || bodyColorClasses['']);
+    
+    // 2. Update Select Element
+    movementSelect.classList.remove(...new Set(allSelectClasses)); // Use Set to remove duplicates
+    movementSelect.classList.add(...(selectColorClasses[value] || selectColorClasses['']));
+}
+
+
+// --- UI Functions ---
+function updateUIState() {
+    startBtn.disabled = isScanning;
+    stopBtn.disabled = !isScanning;
+    flashBtn.disabled = !isScanning;
+    
+    if (isScanning) {
+        readerEl.style.minHeight = '250px';
+        readerEl.classList.add('border-emerald-500');
+        readerEl.classList.remove('border-gray-300');
+    } else {
+        readerEl.style.minHeight = '0px';
+        readerEl.innerHTML = '';
+        readerEl.classList.remove('border-emerald-500');
+        readerEl.classList.add('border-gray-300');
+        flashBtn.classList.add('hidden');
+        isFlashOn = false;
+        updateFlashUI();
+    }
+    scanCountEl.textContent = `عدد الحالات المسجلة: ${records.length}`;
+}
+
+function updateFlashUI() {
+    const flashOnPath = document.getElementById('flashOnPath');
+    const flashOffPath = document.getElementById('flashOffPath');
+    
+    if (isFlashOn) {
+        flashBtn.classList.remove('bg-gray-600', 'hover:bg-gray-700');
+        flashBtn.classList.add('bg-yellow-400', 'hover:bg-yellow-500', 'text-black');
+        flashOnPath.style.display = 'block';
+        flashOffPath.style.display = 'none';
+    } else {
+        flashBtn.classList.add('bg-gray-600', 'hover:bg-gray-700');
+        flashBtn.classList.remove('bg-yellow-400', 'hover:bg-yellow-500', 'text-black');
+        flashOnPath.style.display = 'none';
+        flashOffPath.style.display = 'block';
+    }
+}
+
+let messageTimer;
+function showMessage(text, type = 'info') {
+    clearTimeout(messageTimer);
+    messageEl.textContent = text;
+    messageEl.className = `fixed top-5 left-1/2 -translate-x-1/2 px-6 py-3 rounded-lg shadow-xl text-white font-bold text-center z-50 animate-fade-in-down`;
+    if (type === 'success') messageEl.classList.add('bg-emerald-500');
+    else if (type === 'error') messageEl.classList.add('bg-red-500');
+    else messageEl.classList.add('bg-blue-500');
+    
+    messageEl.style.display = 'block';
+    messageTimer = setTimeout(() => {
+        messageEl.style.display = 'none';
+    }, 2500);
+}
+
+// --- Core Functions ---
+function playBeepAndVibrate() {
+    // Create a new Audio object on each call to ensure reliability
+    // across different browsers and to comply with autoplay policies.
+    const audio = new Audio("data:audio/wav;base64," + BEEP_BASE64);
+    audio.volume = 1.0;
+    audio.play().catch(e => console.warn('Audio playback failed:', e));
+    
+    if (navigator.vibrate) {
+        navigator.vibrate(180);
+    }
+}
+
+function sendToGoogle(record) {
+    const params = new URLSearchParams();
+    params.append('records_batch', JSON.stringify([{
+        id: record.id,
+        employee_id: record.employeeId,
+        movement_type: record.movement,
+        timestamp: record.timestamp,
+        source: record.source
+    }]));
+    const body = params.toString();
+
+    fetch(GOOGLE_SCRIPT_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body
+    }).catch(() => {
+        if (navigator.sendBeacon) {
+            navigator.sendBeacon(GOOGLE_SCRIPT_URL, new Blob([body], { type: 'application/x-www-form-urlencoded' }));
+        }
+    });
+}
+
+function addRecord(employeeId, source) {
+    const movement = movementSelect.value;
+    if (!movement) {
+        showMessage('الرجاء اختيار نوع الحركة أولاً.', 'error');
+        return false;
+    }
+    
+    const now = new Date();
+    const newRecord = {
+        id: `local-${now.getTime()}-${Math.random().toString(36).slice(2, 8)}`,
+        employeeId: String(employeeId).trim(),
+        movement: movement,
+        timestamp: now.toISOString(),
+        date: now.toLocaleDateString('ar-EG'),
+        time: now.toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+        source: source,
+    };
+
+    records.unshift(newRecord);
+    saveToSession();
+    sendToGoogle(newRecord);
+    playBeepAndVibrate();
+    showMessage(`✅ تم تسجيل ${newRecord.movement} لـ ${newRecord.employeeId}`, 'success');
+    updateUIState();
+    return true;
+}
+
+// --- Scanner Logic ---
+const onScanSuccess = (decodedText, decodedResult) => {
+    const now = Date.now();
+    if (decodedText === lastScannedId && (now - lastScannedAt) < DEBOUNCE_MS) {
+        return; // Debounce
+    }
+    lastScannedId = decodedText;
+    lastScannedAt = now;
+    
+    if (html5QrCode && isScanning) {
+        html5QrCode.pause();
+        addRecord(decodedText, 'QR');
+        setTimeout(() => {
+            if (isScanning) {
+                 html5QrCode.resume();
+            }
+        }, 800);
+    }
+};
+
+const onScanFailure = (error) => { /* ignore */ };
+
+function startScanner() {
+    if (!movementSelect.value) {
+        showMessage('الرجاء اختيار نوع الحركة أولاً.', 'error');
+        return;
+    }
+    if (isScanning) return;
+
+    html5QrCode = new Html5Qrcode(READER_ID);
+    const config = { fps: 10, qrbox: { width: 250, height: 250 }, aspectRatio: 1.0 };
+
+    Html5Qrcode.getCameras().then(devices => {
+        if (devices && devices.length) {
+            const cameraId = devices.find(d => (d.label || '').toLowerCase().includes('back'))?.id || devices[0].id;
+            html5QrCode.start(cameraId, config, onScanSuccess, onScanFailure)
+                .then(() => {
+                    isScanning = true;
+                    updateUIState();
+                     // Safely check for torch capability
+                    try {
+                        const track = html5QrCode.getRunningTrack();
+                        if (track) {
+                            const capabilities = track.getCapabilities();
+                            if (capabilities && capabilities.torch) {
+                                flashBtn.classList.remove('hidden');
+                            }
+                        }
+                    } catch (e) {
+                        console.warn("Could not check for torch capabilities:", e);
+                    }
+                })
+                .catch(err => {
+                    console.error("Failed to start scanner:", err);
+                    showMessage('خطأ: لا يمكن الوصول للكاميرا. تأكد من الأذونات.', 'error');
+                });
+        } else {
+            showMessage('خطأ: لم يتم العثور على كاميرا.', 'error');
+        }
+    }).catch(err => {
+        console.error("Camera permissions error:", err);
+        showMessage('خطأ: لا يمكن الوصول للكاميرا. تأكد من الأذونات.', 'error');
+    });
+}
+
+function stopScanner() {
+    if (html5QrCode && isScanning) {
+        html5QrCode.stop()
+            .then(() => {
+                isScanning = false;
+                html5QrCode = null;
+                lastScannedId = null;
+                showMessage('تم إيقاف الماسح.', 'info');
+                updateUIState();
+            })
+            .catch(err => {
+                console.error("Failed to stop scanner:", err);
+                isScanning = false;
+                updateUIState();
+            });
+    }
+}
+
+function toggleFlash() {
+    if (isScanning && html5QrCode) {
+        isFlashOn = !isFlashOn;
+        html5QrCode.applyVideoConstraints({
+            advanced: [{ torch: isFlashOn }]
+        });
+        updateFlashUI();
+    }
+}
+
+// --- Event Handlers & Storage ---
+function handleManualAdd() {
+    const value = manualInput.value.trim();
+    if (!value) {
+        showMessage('أدخل رقمًا صالحًا', 'error');
+        return;
+    }
+    if (addRecord(value, 'Manual')) {
+        manualInput.value = '';
+    }
+}
+
+function exportToCsv() {
+    if (records.length === 0) {
+        showMessage('لا توجد سجلات لتصديرها.', 'info');
+        return;
+    }
+    const data = [...records].sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+    const headers = ['ID', 'Employee Code', 'Movement Type', 'Timestamp', 'Source'];
+    
+    const escapeCsv = (val) => {
+        if (val == null) return '';
+        let str = String(val);
+        if (str.includes(',') || str.includes('"') || str.includes('\n')) {
+            return `"${str.replace(/"/g, '""')}"`;
+        }
+        return str;
+    };
+    
+    let csvContent = headers.join(',') + '\n';
+    data.forEach(r => {
+        const row = [
+            escapeCsv(r.id),
+            escapeCsv(r.employeeId),
+            escapeCsv(r.movement),
+            escapeCsv(new Date(r.timestamp).toLocaleString('en-CA', { hour12: false }).replace(',', '')),
+            escapeCsv(r.source)
+        ];
+        csvContent += row.join(',') + '\n';
+    });
+
+    const blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `Attendance_Records_${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
+function saveToSession() {
+    try {
+        sessionStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(records));
+    } catch (e) {
+        console.error("Failed to save to session storage", e);
+    }
+}
+
+function loadFromSession() {
+    try {
+        const stored = sessionStorage.getItem(SESSION_STORAGE_KEY);
+        if (stored) {
+            records = JSON.parse(stored);
+        }
+    } catch (e) {
+        console.error("Failed to load from session storage", e);
+        records = [];
+    }
+    updateUIState();
+}
+
+// --- Initialization ---
+document.addEventListener('DOMContentLoaded', () => {
+    startBtn.addEventListener('click', startScanner);
+    stopBtn.addEventListener('click', stopScanner);
+    flashBtn.addEventListener('click', toggleFlash);
+    manualAddBtn.addEventListener('click', handleManualAdd);
+    exportBtn.addEventListener('click', exportToCsv);
+    movementSelect.addEventListener('change', updateThemeColor);
+
+    // Enforce numbers only for manual input
+    manualInput.addEventListener('input', () => {
+        manualInput.value = manualInput.value.replace(/[^0-9]/g, '');
+    });
+    
+    loadFromSession();
+    updateThemeColor(); // Set initial theme
+});
+
+</script>
+
+</body>
+</html>
