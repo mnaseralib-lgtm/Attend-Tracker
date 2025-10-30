@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -10,7 +9,7 @@
     <meta name="theme-color" content="#10b981"/>
     <style>
       body {
-        font-family: -apple-system, BlinkMacFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
       }
       /* Simple animation for the confirmation message */
       @keyframes fadeInDown {
@@ -65,14 +64,14 @@
                     <div class="flex items-center gap-2">
                         <label for="movementSelect" class="text-sm font-medium text-gray-700 whitespace-nowrap">نوع الحركة:</label>
                         <select id="movementSelect" class="block w-40 px-3 py-2 border-2 rounded-md shadow-sm focus:outline-none focus:ring-2 sm:text-sm transition-all duration-300">
-                            <option value="">اختر الحركة</option>
+                            <option value="">اختر نوع الحركة</option>
                             <option value="دخول">دخول</option>
                             <option value="انصراف">انصراف</option>
                             <option value="انصراف مسائي">مسائي</option>
                         </select>
                     </div>
                     <div id="scanCount" class="font-bold text-emerald-800 bg-emerald-100 px-3 py-2 rounded-md">
-                        Count: 0
+                        عدد الحالات المسجلة: 0
                     </div>
                     <div class="flex gap-2">
                          <button id="startBtn" class="flex items-center justify-center gap-2 px-4 py-2 font-semibold text-white bg-emerald-500 rounded-md shadow-sm hover:bg-emerald-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors">
@@ -370,9 +369,8 @@ function startScanner() {
                         const track = html5QrCode.getRunningTrack();
                         if (track) {
                             const capabilities = track.getCapabilities();
-                             // Correctly check if the torch capability is supported and available.
-                             // The 'torch' property will be true if it's supported.
-                            if (capabilities && capabilities.torch) {
+                             // Robustly check if the torch capability is supported.
+                            if (capabilities && typeof capabilities.torch === 'boolean') {
                                 canUseFlash = true;
                             } else {
                                 canUseFlash = false;
@@ -425,20 +423,32 @@ function toggleFlash() {
 
     const newFlashState = !isFlashOn;
 
-    // applyVideoConstraints returns a Promise. We must handle it.
-    html5QrCode.applyVideoConstraints({
-        advanced: [{ torch: newFlashState }]
-    })
-    .then(() => {
-        // Only update the state and UI on success.
-        isFlashOn = newFlashState;
-        updateFlashUI();
-    })
-    .catch(err => {
-        console.error("Failed to apply torch constraints:", err);
-        showMessage('خطأ: لم يتمكن من تشغيل الفلاش.', 'error');
-        // If it failed, the state wasn't changed, so no need to revert.
-    });
+    try {
+        // Get the underlying video track directly from the library.
+        const track = html5QrCode.getRunningTrack();
+
+        if (!track || typeof track.applyConstraints !== 'function') {
+             showMessage('خطأ: لا يمكن الوصول إلى تحكم الكاميرا.', 'error');
+             return;
+        }
+
+        // Use the fundamental browser API to control the torch. This is more reliable.
+        track.applyConstraints({
+            advanced: [{ torch: newFlashState }]
+        })
+        .then(() => {
+            // Only update state and UI after the browser confirms success.
+            isFlashOn = newFlashState;
+            updateFlashUI();
+        })
+        .catch(err => {
+            console.error("Failed to apply torch constraints directly on track:", err);
+            showMessage('خطأ: هذا الجهاز لا يدعم تشغيل الفلاش.', 'error');
+        });
+    } catch (e) {
+        console.error("Error trying to access video track for flash control:", e);
+        showMessage('خطأ: مشكلة في الوصول إلى الكاميرا.', 'error');
+    }
 }
 
 function toggleMute() {
