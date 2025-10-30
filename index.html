@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -416,38 +417,43 @@ function stopScanner() {
     }
 }
 
-function toggleFlash() {
-    if (!isScanning || !html5QrCode || !canUseFlash) {
+async function toggleFlash() {
+    if (!isScanning || !html5QrCode) {
+        return;
+    }
+    
+    if (!canUseFlash) {
+        showMessage('الفلاش غير مدعوم لهذه الكاميرا.', 'error');
         return;
     }
 
-    const newFlashState = !isFlashOn;
-
+    let track;
     try {
-        // Get the underlying video track directly from the library.
-        const track = html5QrCode.getRunningTrack();
-
-        if (!track || typeof track.applyConstraints !== 'function') {
-             showMessage('خطأ: لا يمكن الوصول إلى تحكم الكاميرا.', 'error');
-             return;
+        track = html5QrCode.getRunningTrack();
+        if (!track) {
+            showMessage('خطأ: لا يمكن الوصول إلى بث الكاميرا.', 'error');
+            return;
         }
-
-        // Use the fundamental browser API to control the torch. This is more reliable.
-        track.applyConstraints({
-            advanced: [{ torch: newFlashState }]
-        })
-        .then(() => {
-            // Only update state and UI after the browser confirms success.
-            isFlashOn = newFlashState;
-            updateFlashUI();
-        })
-        .catch(err => {
-            console.error("Failed to apply torch constraints directly on track:", err);
-            showMessage('خطأ: هذا الجهاز لا يدعم تشغيل الفلاش.', 'error');
-        });
     } catch (e) {
-        console.error("Error trying to access video track for flash control:", e);
-        showMessage('خطأ: مشكلة في الوصول إلى الكاميرا.', 'error');
+        console.error("Failed to get video track:", e);
+        showMessage('خطأ: فشل الوصول إلى إعدادات الكاميرا.', 'error');
+        return;
+    }
+    
+    const newFlashState = !isFlashOn;
+    
+    try {
+        await track.applyConstraints({
+            advanced: [{ torch: newFlashState }]
+        });
+        isFlashOn = newFlashState;
+        updateFlashUI();
+    } catch (err) {
+        console.error("Failed to toggle flash:", err);
+        showMessage('فشل التحكم بالفلاش. قد لا يكون مدعومًا.', 'error');
+        // If it fails once, disable it to prevent repeated errors.
+        canUseFlash = false;
+        updateUIState();
     }
 }
 
