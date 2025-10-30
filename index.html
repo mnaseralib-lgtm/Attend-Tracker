@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -9,7 +10,7 @@
     <meta name="theme-color" content="#10b981"/>
     <style>
       body {
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        font-family: -apple-system, BlinkMacFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
       }
       /* Simple animation for the confirmation message */
       @keyframes fadeInDown {
@@ -369,9 +370,12 @@ function startScanner() {
                         const track = html5QrCode.getRunningTrack();
                         if (track) {
                             const capabilities = track.getCapabilities();
-                             // Use a type-safe check for 'torch'
-                            if ('torch' in capabilities) {
+                             // Correctly check if the torch capability is supported and available.
+                             // The 'torch' property will be true if it's supported.
+                            if (capabilities && capabilities.torch) {
                                 canUseFlash = true;
+                            } else {
+                                canUseFlash = false;
                             }
                         }
                     } catch (e) {
