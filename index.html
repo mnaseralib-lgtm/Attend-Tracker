@@ -30,7 +30,7 @@
 <body class="bg-gray-100 transition-colors duration-500 ease-in-out">
 
     <div class="min-h-screen flex items-start justify-center p-4 pt-8 sm:p-6">
-        <div class="w-full max-w-3xl mx-auto bg-white p-5 sm:p-6 rounded-2xl shadow-lg">
+        <div class="w-full max-w-3xl mx-auto bg-white p-5 sm:p-6 rounded-2xl shadow-lg transition-colors duration-500 ease-in-out">
             <header class="text-center mb-6">
                 <h1 class="text-2xl sm:text-3xl font-bold text-gray-800">Abo Qir Metro JV Orascom</h1>
                 <p class="text-sm text-gray-500 mt-1">HR Department Attendance Tracker</p>
@@ -40,7 +40,7 @@
                 <div class="bg-gray-50 p-4 rounded-lg flex flex-col sm:flex-row items-center justify-center gap-4 flex-wrap mb-4 border border-gray-200">
                     <div class="flex items-center gap-2">
                         <label for="movementSelect" class="text-sm font-medium text-gray-700 whitespace-nowrap">نوع الحركة:</label>
-                        <select id="movementSelect" class="block w-40 px-3 py-2 bg-white border-2 border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 sm:text-sm transition-all duration-300">
+                        <select id="movementSelect" class="block w-40 px-3 py-2 bg-white border-2 border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 sm:text-sm transition-colors duration-300">
                             <option value="">اختر نوع الحركة</option>
                             <option value="دخول">دخول</option>
                             <option value="انصراف">انصراف</option>
@@ -59,9 +59,12 @@
                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><circle cx="12" cy="12" r="10" /><rect width="6" height="6" x="9" y="9" /></svg>
                             <span>Stop</span>
                         </button>
-                         <button id="flashBtn" class="hidden items-center justify-center gap-2 px-4 py-2 font-semibold text-white bg-yellow-500 rounded-md shadow-sm hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors">
-                            <svg id="flashIcon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="M13 2H3v10h10v10h10v-10L13 2z"></path><polyline points="13 2 13 13 2 13"></polyline></svg>
-                            <span id="flashText">Flash</span>
+                         <button id="flashBtn" class="hidden items-center justify-center p-2.5 font-semibold text-white bg-gray-600 rounded-md shadow-sm hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors">
+                            <svg id="flashIcon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
+                                <path id="flashOffPath" d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"></path>
+                                <path id="flashOnPath" d="M13 2 3 14h9l-1 8 10-12h-9l1-8z" fill="currentColor" style="display: none;"></path>
+                            </svg>
+                            <span class="sr-only">Toggle Flash</span>
                         </button>
                     </div>
                 </div>
@@ -70,7 +73,7 @@
 
                 <div class="manual-entry mt-6 pt-6 border-t">
                     <div class="flex flex-col sm:flex-row items-center justify-center gap-2">
-                       <input id="manualInput" type="text" inputmode="numeric" maxlength="14" placeholder="إدخال يدوي - رقم فقط" class="w-full sm:w-64 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" />
+                       <input id="manualInput" type="text" placeholder="إدخال يدوي - رقم أو اسم" class="w-full sm:w-64 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" />
                         <button id="manualAddBtn" class="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2 font-semibold text-white bg-blue-500 rounded-md shadow-sm hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>
                             <span>إضافة يدوي</span>
@@ -124,35 +127,26 @@ const messageEl = document.getElementById('message');
 function updateThemeColor() {
     const value = movementSelect.value;
     
-    // Define BRIGHTER color mappings
+    // Define color mappings
     const bodyColors = {
         '': 'bg-gray-100',
-        'دخول': 'bg-emerald-100',
-        'انصراف': 'bg-blue-100',
-        'انصراف مسائي': 'bg-red-100'
+        'دخول': 'bg-emerald-50',
+        'انصراف': 'bg-blue-50',
+        'انصراف مسائي': 'bg-red-50'
     };
-    const selectClassesConfig = {
-        '': ['bg-white', 'border-gray-300', 'focus:ring-emerald-500', 'text-gray-900'],
-        'دخول': ['bg-emerald-200', 'border-emerald-500', 'focus:ring-emerald-500', 'text-emerald-900', 'font-semibold'],
-        'انصراف': ['bg-blue-200', 'border-blue-500', 'focus:ring-blue-500', 'text-blue-900', 'font-semibold'],
-        'انصراف مسائي': ['bg-red-200', 'border-red-500', 'focus:ring-red-500', 'text-red-900', 'font-semibold']
+    const selectColors = {
+        '': ['border-gray-300', 'focus:ring-emerald-500'],
+        'دخول': ['border-emerald-500', 'focus:ring-emerald-500'],
+        'انصراف': ['border-blue-500', 'focus:ring-blue-500'],
+        'انصراف مسائي': ['border-red-500', 'focus:ring-red-500']
     };
 
-    // Reset body classes
+    // Reset classes
     bodyEl.className = 'transition-colors duration-500 ease-in-out';
     bodyEl.classList.add(bodyColors[value] || bodyColors['']);
     
-    // Define all possible classes to remove them all at once to avoid conflicts
-    const allClasses = [
-        ...selectClassesConfig[''], ...selectClassesConfig['دخول'], 
-        ...selectClassesConfig['انصراف'], ...selectClassesConfig['انصراف مسائي']
-    ];
-    // Use a Set to get unique class names
-    [...new Set(allClasses)].forEach(cls => movementSelect.classList.remove(cls));
-
-    // Add the new classes for the selected theme
-    const newClasses = selectClassesConfig[value] || selectClassesConfig[''];
-    movementSelect.classList.add(...newClasses);
+    movementSelect.classList.remove('border-gray-300', 'border-emerald-500', 'border-blue-500', 'border-red-500', 'focus:ring-emerald-500', 'focus:ring-blue-500', 'focus:ring-red-500');
+    movementSelect.classList.add(...(selectColors[value] || selectColors['']));
 }
 
 
@@ -179,15 +173,19 @@ function updateUIState() {
 }
 
 function updateFlashUI() {
-    const flashText = document.getElementById('flashText');
+    const flashOnPath = document.getElementById('flashOnPath');
+    const flashOffPath = document.getElementById('flashOffPath');
+    
     if (isFlashOn) {
-        flashBtn.classList.add('bg-yellow-400');
-        flashBtn.classList.remove('bg-yellow-500');
-        flashText.textContent = 'Flash On';
+        flashBtn.classList.remove('bg-gray-600', 'hover:bg-gray-700');
+        flashBtn.classList.add('bg-yellow-400', 'hover:bg-yellow-500', 'text-black');
+        flashOnPath.style.display = 'block';
+        flashOffPath.style.display = 'none';
     } else {
-        flashBtn.classList.remove('bg-yellow-400');
-        flashBtn.classList.add('bg-yellow-500');
-        flashText.textContent = 'Flash Off';
+        flashBtn.classList.add('bg-gray-600', 'hover:bg-gray-700');
+        flashBtn.classList.remove('bg-yellow-400', 'hover:bg-yellow-500', 'text-black');
+        flashOnPath.style.display = 'none';
+        flashOffPath.style.display = 'block';
     }
 }
 
@@ -294,7 +292,7 @@ function startScanner() {
     }
     if (isScanning) return;
 
-    html5QrCode = new Html5QrCode(READER_ID);
+    html5QrCode = new Html5Qrcode(READER_ID);
     const config = { fps: 10, qrbox: { width: 250, height: 250 }, aspectRatio: 1.0 };
 
     Html5Qrcode.getCameras().then(devices => {
@@ -355,7 +353,7 @@ function toggleFlash() {
 function handleManualAdd() {
     const value = manualInput.value.trim();
     if (!value) {
-        showMessage('أدخل رقم صالح', 'error');
+        showMessage('أدخل رقم أو اسم صالح', 'error');
         return;
     }
     if (addRecord(value, 'Manual')) {
@@ -431,11 +429,6 @@ document.addEventListener('DOMContentLoaded', () => {
     exportBtn.addEventListener('click', exportToCsv);
     movementSelect.addEventListener('change', updateThemeColor);
     
-    // Enforce numeric only and max length on manual input
-    manualInput.addEventListener('input', () => {
-      manualInput.value = manualInput.value.replace(/\D/g, '').slice(0, 14);
-    });
-
     loadLocally();
     updateThemeColor(); // Set initial theme
 });
