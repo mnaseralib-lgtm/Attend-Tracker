@@ -104,7 +104,7 @@
 <script>
 // --- Constants ---
 const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzGJy8WInLBIJGuqa90bDMWuK9SIHOJ4IH5No8EcvdPWJQsmUKfQqrPNe5aFB7pCwE-sA/exec';
-const LOCAL_STORAGE_KEY = 'attendance_records_v3';
+const SESSION_STORAGE_KEY = 'attendance_records_session_v1';
 const DEBOUNCE_MS = 1500;
 const READER_ID = "reader";
 const BEEP_BASE64 = "UklGRiS9AgBXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABgAZGF0YSS9AgD/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////AAAA//8A/wAAAP//AP8AAAD//wD/AAAA//8A/wAAAP//AP8AAAD//wD/AAAA//8A/wAAAP//AP8AAAD//wD/AAAA//9kAGsA7gHBAgQGDBIZFBoqMDlBVWZ8jZ2/zt/x/gAAA//9bALAA1gH3A/wHDBIdHiguNkBJWGJ6jZ28z9/h/v8AAAD/AAAA//8A/wAAAP//AP8AAAD//wD/AAAA//8A/wAAAP//AP8AAAD//wD/AAAA//8A/wAAAP//AP8AAAD//wD/AAAA//8A/wAAAP//AP8AAAD//wD/AAAA//8A/wAAAP//AP8AAAD//wD/AAAA//8A/wAAAP//AP8AAAD/gnrA1wMHCcQTGxw2QmBkfpaixM7f5/X/AAAA/3N0wNUDPgnCExgcOT5IY2t/mKLGzt7n9f8AAAD/eGfA1gMfCcMTGhs4O0FiaX2WocXO3ufl9/8AAAD/hF3A0gMgCMMRGhs4OkBfa3+Xo8bO3+Tl9v8AAAD/jFXAzgL/BcISGh01OkBfa3+YpcXO3ufl9v8AAAD/nULAvwL4BcMTHB81PEBhaICZpsbP4Ofl+P8AAAD/qmO/ugLzBsQTHh81PEBhaX+bqcjP4ufl+P8AAAD/tmK+tQLvBsQTHh80O0BhaX+cqsjQ4ufl+P8AAAD/vFu9sALnBsQTHh80O0BhaX6drMnR4ufl+P8AAAD/xVa7rgLeBsMSHx80O0BhaX6escnR4ufl+P8AAAD/0FS6qwLYBsMSHx8zO0BhaX6gsMnR4ufl+P8AAAD/2k65pwK9BsMSHx8zO0BhaX6hsMnR4ufl+P8AAAD/5Uu4owK1BsMSHx8zO0BhaX6isMnR4ufl+P8AAAD/70e3nQKqBsMSHx8zO0BhaX6ksMnR4ufl+P8AAAD/+Ua2mgKYBsMSHx8zO0BhaX6lsMnR4ufl+P8AAAD//EW1mAKGBsMSHx8zO0BhaX6msMnR4ufl+P8AAAD/9kC0kQJ/BsMSHx8zO0BhaX6nsMnR4ufl+P8AAAD/6byvggJvBsMSHx8zO0BhaX6psMnR4ufl+P8AAAD/2LmmfwJmBsMSHx8zO0BhaX6ssMnR4ufl+P8AAAD/xLSchAJhBsMSHx8zO0BhaX6uscnR4ufl+P8AAAD/t6yagAJaBsMSHx8zO0BhaX6xscjR4ufl+P8AAAD/pLKXfwJUBsMSHx8zO0BhaX6yscjR4ufl+P8AAAD/k6uVfQJMBr8SHx8zO0BhaX6ysMjR4ufl+P8AAAD/hKeTewJKBr8SHx8zO0BhaX6ysMjR4ufl+P8AAAD/b6OPegJGBr8SHx8zO0BhaX6ysMjR4ufl+P8AAAD/ZqCNfAJABr8SHx8zO0BhaX6xscjR4ufl+P8AAAD/VpiJfgE+Br8SHx8zO0BhaX6xscjR4ufl+P8AAAD/SZuNfwE8Br8SHx8zO0BhaX6xscjR4ufl+P8AAAD/OZ2QggE2Br8SHx8zO0BhaX6xscjR4ufl+P8AAAD/JZ+UigEyBr8SHx8zO0BhaX6xscjR4ufl+P8AAAD//6GZjgEuBr8SHx8zO0BhaX6xscjR4ufl+P8AAAD/aKOkpaanqKmqq6ytrq+wsbKztLW2t7i5uru8vb6/wMHCw8TFxsfIycrLzM3Oz9DR0tPU1dbX2Nna29zd3t/g4eLj5OXm5+jp6uvs7e7v8PHy8/T19vf4+fr7/P3+/w==";
@@ -275,7 +275,7 @@ function addRecord(employeeId, source) {
     };
 
     records.unshift(newRecord);
-    saveLocally();
+    saveToSession();
     sendToGoogle(newRecord);
     playBeepAndVibrate();
     showMessage(`✅ تم تسجيل ${newRecord.movement} لـ ${newRecord.employeeId}`, 'success');
@@ -322,12 +322,17 @@ function startScanner() {
                 .then(() => {
                     isScanning = true;
                     updateUIState();
-                    const track = html5QrCode.getRunningTrack();
-                    if (track) {
-                        const capabilities = track.getCapabilities();
-                        if (capabilities && capabilities.torch) {
-                            flashBtn.classList.remove('hidden');
+                     // Safely check for torch capability
+                    try {
+                        const track = html5QrCode.getRunningTrack();
+                        if (track) {
+                            const capabilities = track.getCapabilities();
+                            if (capabilities && capabilities.torch) {
+                                flashBtn.classList.remove('hidden');
+                            }
                         }
+                    } catch (e) {
+                        console.warn("Could not check for torch capabilities:", e);
                     }
                 })
                 .catch(err => {
@@ -421,22 +426,22 @@ function exportToCsv() {
     document.body.removeChild(link);
 }
 
-function saveLocally() {
+function saveToSession() {
     try {
-        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(records));
+        sessionStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(records));
     } catch (e) {
-        console.error("Failed to save to local storage", e);
+        console.error("Failed to save to session storage", e);
     }
 }
 
-function loadLocally() {
+function loadFromSession() {
     try {
-        const stored = localStorage.getItem(LOCAL_STORAGE_KEY);
+        const stored = sessionStorage.getItem(SESSION_STORAGE_KEY);
         if (stored) {
             records = JSON.parse(stored);
         }
     } catch (e) {
-        console.error("Failed to load from local storage", e);
+        console.error("Failed to load from session storage", e);
         records = [];
     }
     updateUIState();
@@ -456,7 +461,7 @@ document.addEventListener('DOMContentLoaded', () => {
         manualInput.value = manualInput.value.replace(/[^0-9]/g, '');
     });
     
-    loadLocally();
+    loadFromSession();
     updateThemeColor(); // Set initial theme
 });
 
