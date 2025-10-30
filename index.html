@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -25,15 +24,6 @@
       }
       .animate-fade-in-down {
         animation: fadeInDown 0.3s ease-out forwards;
-      }
-      /* Hide number input arrows */
-      input[type=number]::-webkit-inner-spin-button,
-      input[type=number]::-webkit-outer-spin-button {
-        -webkit-appearance: none;
-        margin: 0;
-      }
-      input[type=number] {
-        -moz-appearance: textfield;
       }
     </style>
 </head>
@@ -69,10 +59,10 @@
                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><circle cx="12" cy="12" r="10" /><rect width="6" height="6" x="9" y="9" /></svg>
                             <span>Stop</span>
                         </button>
-                         <button id="flashBtn" class="hidden items-center justify-center p-2.5 font-semibold text-gray-800 bg-gray-200 rounded-md shadow-sm hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
-                            <svg id="flashIcon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" stroke="currentColor" fill="none">
-                               <path id="flashOffPath" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                               <path id="flashOnPath" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" fill="currentColor" style="display: none;"/>
+                         <button id="flashBtn" class="hidden items-center justify-center p-2.5 font-semibold text-white bg-gray-600 rounded-md shadow-sm hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors">
+                            <svg id="flashIcon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
+                                <path id="flashOffPath" d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"></path>
+                                <path id="flashOnPath" d="M13 2 3 14h9l-1 8 10-12h-9l1-8z" fill="currentColor" style="display: none;"></path>
                             </svg>
                             <span class="sr-only">Toggle Flash</span>
                         </button>
@@ -83,7 +73,7 @@
 
                 <div class="manual-entry mt-6 pt-6 border-t">
                     <div class="flex flex-col sm:flex-row items-center justify-center gap-2">
-                       <input id="manualInput" type="tel" inputmode="numeric" maxlength="14" placeholder="إدخال يدوي - 14 رقمًا بحد أقصى" class="w-full sm:w-64 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" />
+                       <input id="manualInput" type="text" placeholder="إدخال يدوي - رقم أو اسم" class="w-full sm:w-64 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" />
                         <button id="manualAddBtn" class="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2 font-semibold text-white bg-blue-500 rounded-md shadow-sm hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>
                             <span>إضافة يدوي</span>
@@ -105,16 +95,345 @@
 <script>
 // --- Constants ---
 const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzGJy8WInLBIJGuqa90bDMWuK9SIHOJ4IH5No8EcvdPWJQsmUKfQqrPNe5aFB7pCwE-sA/exec';
-const LOCAL_STORAGE_KEY = 'attendance_records_v4'; // Incremented version to avoid conflicts
+const LOCAL_STORAGE_KEY = 'attendance_records_v3';
 const DEBOUNCE_MS = 1500;
 const READER_ID = "reader";
-// New, more pleasant chime sound
-const CHIME_BASE64 = "UklGRlAFAABXQVZFZm10IBAAAAABAAIARKwAABCxAgAEABAAZGF0YVBABQAA//8CAP//gP/9/v3+/f/9/v3//f79//3+/f/9/v3//f79/v39/f38/Pz7+/v6+vr5+fn4+Pj39/f29vby8vLx8fHw8PDv7+/u7u7t7e3s7Ozr6+vp6eno6Ojm5ubl5eXk5OTj4+Ph4eHfv7+/f39/fn5+fX19fHx8ezs7Ojo6OHh4d/f39vb29fX18/Pz7u7u7Ozs6Ojo5ubm5eXl4+Pj39/f3d3d2dnZ1tbW0tLS0NDQz8/Py8vLxcXFw8PDu7u7srKytra2s7Ozrq6uq6urqKiooqKihoaGgoKCgICAf39/fHx8e3t7enp6eXl5eHh4d3d3dHR0c3NzcXFxcHBwb29vbm5ubW1tampqaWlpZmZmaGhoZ2dnaGhon6ChoJ+fn56enp2dnZubm5qampaWlpSUlI+Pj4yMjIqKiomJiYiIiIiIiIaGhoWFhYSEhH9/f35+fnx8fHp6enZ2dmtra2VlZWNjY19fX1xcXFlZWVhYWFdXV1VVVVBQUE9PT0xMTEVFRURE legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barátom a legjobb barát-";
+const BEEP_BASE64 = "UklGRuQAAABXQVZFZm10IBAAAAABAAEAgD4AAAB9AAACABAAZGF0YcQAAACAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICA=";
 
 // --- State ---
 let records = [];
 let html5QrCode = null;
 let isScanning = false;
 let isFlashOn = false;
-...
-```
+let lastScannedId = null;
+let lastScannedAt = 0;
+const beepAudio = new Audio("data:audio/wav;base64," + BEEP_BASE64);
+beepAudio.volume = 1.0;
+
+// --- DOM Elements ---
+const bodyEl = document.body;
+const movementSelect = document.getElementById('movementSelect');
+const scanCountEl = document.getElementById('scanCount');
+const startBtn = document.getElementById('startBtn');
+const stopBtn = document.getElementById('stopBtn');
+const flashBtn = document.getElementById('flashBtn');
+const readerEl = document.getElementById('reader');
+const manualInput = document.getElementById('manualInput');
+const manualAddBtn = document.getElementById('manualAddBtn');
+const exportBtn = document.getElementById('exportBtn');
+const messageEl = document.getElementById('message');
+
+// --- THEME/COLOR Functions ---
+function updateThemeColor() {
+    const value = movementSelect.value;
+    
+    // Define color mappings
+    const bodyColors = {
+        '': 'bg-gray-100',
+        'دخول': 'bg-emerald-50',
+        'انصراف': 'bg-blue-50',
+        'انصراف مسائي': 'bg-red-50'
+    };
+    const selectColors = {
+        '': ['border-gray-300', 'focus:ring-emerald-500'],
+        'دخول': ['border-emerald-500', 'focus:ring-emerald-500'],
+        'انصراف': ['border-blue-500', 'focus:ring-blue-500'],
+        'انصراف مسائي': ['border-red-500', 'focus:ring-red-500']
+    };
+
+    // Reset classes
+    bodyEl.className = 'transition-colors duration-500 ease-in-out';
+    bodyEl.classList.add(bodyColors[value] || bodyColors['']);
+    
+    movementSelect.classList.remove('border-gray-300', 'border-emerald-500', 'border-blue-500', 'border-red-500', 'focus:ring-emerald-500', 'focus:ring-blue-500', 'focus:ring-red-500');
+    movementSelect.classList.add(...(selectColors[value] || selectColors['']));
+}
+
+
+// --- UI Functions ---
+function updateUIState() {
+    startBtn.disabled = isScanning;
+    stopBtn.disabled = !isScanning;
+    flashBtn.disabled = !isScanning;
+    
+    if (isScanning) {
+        readerEl.style.minHeight = '250px';
+        readerEl.classList.add('border-emerald-500');
+        readerEl.classList.remove('border-gray-300');
+    } else {
+        readerEl.style.minHeight = '0px';
+        readerEl.innerHTML = '';
+        readerEl.classList.remove('border-emerald-500');
+        readerEl.classList.add('border-gray-300');
+        flashBtn.classList.add('hidden');
+        isFlashOn = false;
+        updateFlashUI();
+    }
+    scanCountEl.textContent = `عدد الحالات المسجلة: ${records.length}`;
+}
+
+function updateFlashUI() {
+    const flashOnPath = document.getElementById('flashOnPath');
+    const flashOffPath = document.getElementById('flashOffPath');
+    
+    if (isFlashOn) {
+        flashBtn.classList.remove('bg-gray-600', 'hover:bg-gray-700');
+        flashBtn.classList.add('bg-yellow-400', 'hover:bg-yellow-500', 'text-black');
+        flashOnPath.style.display = 'block';
+        flashOffPath.style.display = 'none';
+    } else {
+        flashBtn.classList.add('bg-gray-600', 'hover:bg-gray-700');
+        flashBtn.classList.remove('bg-yellow-400', 'hover:bg-yellow-500', 'text-black');
+        flashOnPath.style.display = 'none';
+        flashOffPath.style.display = 'block';
+    }
+}
+
+let messageTimer;
+function showMessage(text, type = 'info') {
+    clearTimeout(messageTimer);
+    messageEl.textContent = text;
+    messageEl.className = `fixed top-5 left-1/2 -translate-x-1/2 px-6 py-3 rounded-lg shadow-xl text-white font-bold text-center z-50 animate-fade-in-down`;
+    if (type === 'success') messageEl.classList.add('bg-emerald-500');
+    else if (type === 'error') messageEl.classList.add('bg-red-500');
+    else messageEl.classList.add('bg-blue-500');
+    
+    messageEl.style.display = 'block';
+    messageTimer = setTimeout(() => {
+        messageEl.style.display = 'none';
+    }, 2500);
+}
+
+// --- Core Functions ---
+function playBeepAndVibrate() {
+    beepAudio.currentTime = 0;
+    beepAudio.play().catch(e => console.warn('Beep failed:', e));
+    if (navigator.vibrate) {
+        navigator.vibrate(180);
+    }
+}
+
+function sendToGoogle(record) {
+    const params = new URLSearchParams();
+    params.append('records_batch', JSON.stringify([{
+        id: record.id,
+        employee_id: record.employeeId,
+        movement_type: record.movement,
+        timestamp: record.timestamp,
+        source: record.source
+    }]));
+    const body = params.toString();
+
+    fetch(GOOGLE_SCRIPT_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body
+    }).catch(() => {
+        if (navigator.sendBeacon) {
+            navigator.sendBeacon(GOOGLE_SCRIPT_URL, new Blob([body], { type: 'application/x-www-form-urlencoded' }));
+        }
+    });
+}
+
+function addRecord(employeeId, source) {
+    const movement = movementSelect.value;
+    if (!movement) {
+        showMessage('الرجاء اختيار نوع الحركة أولاً.', 'error');
+        return false;
+    }
+    
+    const now = new Date();
+    const newRecord = {
+        id: `local-${now.getTime()}-${Math.random().toString(36).slice(2, 8)}`,
+        employeeId: String(employeeId).trim(),
+        movement: movement,
+        timestamp: now.toISOString(),
+        date: now.toLocaleDateString('ar-EG'),
+        time: now.toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+        source: source,
+    };
+
+    records.unshift(newRecord);
+    saveLocally();
+    sendToGoogle(newRecord);
+    playBeepAndVibrate();
+    showMessage(`✅ تم تسجيل ${newRecord.movement} لـ ${newRecord.employeeId}`, 'success');
+    updateUIState();
+    return true;
+}
+
+// --- Scanner Logic ---
+const onScanSuccess = (decodedText, decodedResult) => {
+    const now = Date.now();
+    if (decodedText === lastScannedId && (now - lastScannedAt) < DEBOUNCE_MS) {
+        return; // Debounce
+    }
+    lastScannedId = decodedText;
+    lastScannedAt = now;
+    
+    if (html5QrCode && isScanning) {
+        html5QrCode.pause();
+        addRecord(decodedText, 'QR');
+        setTimeout(() => {
+            if (isScanning) {
+                 html5QrCode.resume();
+            }
+        }, 800);
+    }
+};
+
+const onScanFailure = (error) => { /* ignore */ };
+
+function startScanner() {
+    if (!movementSelect.value) {
+        showMessage('الرجاء اختيار نوع الحركة أولاً.', 'error');
+        return;
+    }
+    if (isScanning) return;
+
+    html5QrCode = new Html5Qrcode(READER_ID);
+    const config = { fps: 10, qrbox: { width: 250, height: 250 }, aspectRatio: 1.0 };
+
+    Html5Qrcode.getCameras().then(devices => {
+        if (devices && devices.length) {
+            const cameraId = devices.find(d => (d.label || '').toLowerCase().includes('back'))?.id || devices[0].id;
+            html5QrCode.start(cameraId, config, onScanSuccess, onScanFailure)
+                .then(() => {
+                    isScanning = true;
+                    updateUIState();
+                    const track = html5QrCode.getRunningTrack();
+                    const capabilities = track.getCapabilities();
+                    if (capabilities.torch) {
+                        flashBtn.classList.remove('hidden');
+                    }
+                })
+                .catch(err => {
+                    console.error("Failed to start scanner:", err);
+                    showMessage('خطأ: لا يمكن الوصول للكاميرا. تأكد من الأذونات.', 'error');
+                });
+        } else {
+            showMessage('خطأ: لم يتم العثور على كاميرا.', 'error');
+        }
+    }).catch(err => {
+        console.error("Camera permissions error:", err);
+        showMessage('خطأ: لا يمكن الوصول للكاميرا. تأكد من الأذونات.', 'error');
+    });
+}
+
+function stopScanner() {
+    if (html5QrCode && isScanning) {
+        html5QrCode.stop()
+            .then(() => {
+                isScanning = false;
+                html5QrCode = null;
+                lastScannedId = null;
+                showMessage('تم إيقاف الماسح.', 'info');
+                updateUIState();
+            })
+            .catch(err => {
+                console.error("Failed to stop scanner:", err);
+                isScanning = false;
+                updateUIState();
+            });
+    }
+}
+
+function toggleFlash() {
+    if (isScanning && html5QrCode) {
+        isFlashOn = !isFlashOn;
+        html5QrCode.applyVideoConstraints({
+            advanced: [{ torch: isFlashOn }]
+        });
+        updateFlashUI();
+    }
+}
+
+// --- Event Handlers & Storage ---
+function handleManualAdd() {
+    const value = manualInput.value.trim();
+    if (!value) {
+        showMessage('أدخل رقم أو اسم صالح', 'error');
+        return;
+    }
+    if (addRecord(value, 'Manual')) {
+        manualInput.value = '';
+    }
+}
+
+function exportToCsv() {
+    if (records.length === 0) {
+        showMessage('لا توجد سجلات لتصديرها.', 'info');
+        return;
+    }
+    const data = [...records].sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+    const headers = ['ID', 'Employee Code', 'Movement Type', 'Timestamp', 'Source'];
+    
+    const escapeCsv = (val) => {
+        if (val == null) return '';
+        let str = String(val);
+        if (str.includes(',') || str.includes('"') || str.includes('\n')) {
+            return `"${str.replace(/"/g, '""')}"`;
+        }
+        return str;
+    };
+    
+    let csvContent = headers.join(',') + '\n';
+    data.forEach(r => {
+        const row = [
+            escapeCsv(r.id),
+            escapeCsv(r.employeeId),
+            escapeCsv(r.movement),
+            escapeCsv(new Date(r.timestamp).toLocaleString('en-CA', { hour12: false }).replace(',', '')),
+            escapeCsv(r.source)
+        ];
+        csvContent += row.join(',') + '\n';
+    });
+
+    const blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `Attendance_Records_${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
+function saveLocally() {
+    try {
+        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(records));
+    } catch (e) {
+        console.error("Failed to save to local storage", e);
+    }
+}
+
+function loadLocally() {
+    try {
+        const stored = localStorage.getItem(LOCAL_STORAGE_KEY);
+        if (stored) {
+            records = JSON.parse(stored);
+        }
+    } catch (e) {
+        console.error("Failed to load from local storage", e);
+        records = [];
+    }
+    updateUIState();
+}
+
+// --- Initialization ---
+document.addEventListener('DOMContentLoaded', () => {
+    startBtn.addEventListener('click', startScanner);
+    stopBtn.addEventListener('click', stopScanner);
+    flashBtn.addEventListener('click', toggleFlash);
+    manualAddBtn.addEventListener('click', handleManualAdd);
+    exportBtn.addEventListener('click', exportToCsv);
+    movementSelect.addEventListener('change', updateThemeColor);
+    
+    loadLocally();
+    updateThemeColor(); // Set initial theme
+});
+
+</script>
+
+</body>
+</html>
