@@ -107,7 +107,8 @@ const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzGJy8WInLBIJ
 const SESSION_STORAGE_KEY = 'attendance_records_session_v1';
 const DEBOUNCE_MS = 1500;
 const READER_ID = "reader";
-const BEEP_BASE64 = "UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YU0HT19FCg8dKzQ+RExUX3l/h5eoqLe8vsbL09rh5e3x8/f5/f/8/f3+fv7+f/49/j/8Pv7+/f38/f39/f3+f/4//j/9P/0//f/8f/x/+v/5//j/+P/4//j/+f/6//r/+//8//z//P/9//4//n/+f/6//r/+/79/v8A/wD/AP8BAgECAwIEBgYIBwkKCw0ODxAREhMUFRYXGBkaGxwdHh8gISIjJCUmJygpKissLS4vMDEyMzQ1Njc4OTo7PD0+P0BBQkNERUZHSElKS0xNTk9QUVJTVFVWV1hZWltcXV5fYGFiY2RlZmdoaWprbG1ub3BxcnN0dXZ3eHl6e3x9fn+AgYKDhIWGh4iJiouMjY6PkJGSk5SVlpeYmZqbnJ2en6ChoqOkpaanqKmqq6ytrq+wsbKztLW2t7i5uru8vb6/wMHCw8TFxsfIycrLzM3Oz9DR0tPU1dbX2Nna29zd3t/g4eLj5OXm5+jp6uvs7e7v8PHy8/T19vf4+fr7/P3+/w==";
+// A reliable, short "plop" sound
+const BEEP_BASE64 = "UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABgAAABkYXRhAgAAAEz/gP5A/0D/UP+0/wD/0f+e/7T/Qf8E/7T/zv/j/+//9/+8/1L/9/+8/87/1P/r/8H/5v/j/57/tP9B/wT/tP/O/+P/7//3/7z/Uv/3/7z/zv/U/+v/wf/m/+P/nv+0/0H/BP+0/87/4//v//f/vP9S//f/vP/O/9T/6//B/+b/4/+e/7T/Qf8E/7T/zv/j/+//9/+8/1L/9/+8/87/1P/r/8H/5v/j/57/tP9B/wT/tP/O/+P/7//3/7z/Uv/3/7z/zv/U/+v/wf/m/+P/nv+0/0H/";
 
 // --- State ---
 let records = [];
@@ -116,8 +117,7 @@ let isScanning = false;
 let isFlashOn = false;
 let lastScannedId = null;
 let lastScannedAt = 0;
-const beepAudio = new Audio("data:audio/wav;base64," + BEEP_BASE64);
-beepAudio.volume = 1.0;
+// Note: Global audio object is removed to prevent state issues.
 
 // --- DOM Elements ---
 const bodyEl = document.body;
@@ -226,8 +226,12 @@ function showMessage(text, type = 'info') {
 
 // --- Core Functions ---
 function playBeepAndVibrate() {
-    beepAudio.currentTime = 0;
-    beepAudio.play().catch(e => console.warn('Beep failed:', e));
+    // Create a new Audio object on each call to ensure reliability
+    // across different browsers and to comply with autoplay policies.
+    const audio = new Audio("data:audio/wav;base64," + BEEP_BASE64);
+    audio.volume = 1.0;
+    audio.play().catch(e => console.warn('Audio playback failed:', e));
+    
     if (navigator.vibrate) {
         navigator.vibrate(180);
     }
