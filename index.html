@@ -49,7 +49,7 @@
                 <div class="bg-gray-50 p-4 rounded-lg flex flex-col sm:flex-row items-center justify-center gap-4 flex-wrap mb-4 border border-gray-200">
                     <div class="flex items-center gap-2">
                         <label for="movementSelect" class="text-sm font-medium text-gray-700 whitespace-nowrap">نوع الحركة:</label>
-                        <select id="movementSelect" class="block w-40 px-3 py-2 bg-white border-2 border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 sm:text-sm transition-colors duration-300">
+                        <select id="movementSelect" class="block w-40 px-3 py-2 border-2 rounded-md shadow-sm focus:outline-none focus:ring-2 sm:text-sm transition-colors duration-300">
                             <option value="">اختر نوع الحركة</option>
                             <option value="دخول">دخول</option>
                             <option value="انصراف">انصراف</option>
@@ -136,26 +136,37 @@ const messageEl = document.getElementById('message');
 function updateThemeColor() {
     const value = movementSelect.value;
     
-    // Define color mappings with more vivid colors
-    const bodyColors = {
+    // Define color mappings with brighter colors
+    const bodyColorClasses = {
         '': 'bg-gray-100',
-        'دخول': 'bg-emerald-100',
-        'انصراف': 'bg-blue-100',
-        'انصراف مسائي': 'bg-red-100'
-    };
-    const selectColors = {
-        '': ['border-gray-400', 'focus:ring-emerald-600'],
-        'دخول': ['border-emerald-600', 'focus:ring-emerald-600'],
-        'انصراف': ['border-blue-600', 'focus:ring-blue-600'],
-        'انصراف مسائي': ['border-red-600', 'focus:ring-red-600']
+        'دخول': 'bg-emerald-50',
+        'انصراف': 'bg-blue-50',
+        'انصراف مسائي': 'bg-red-50'
     };
 
-    // Reset classes
-    bodyEl.className = 'transition-colors duration-500 ease-in-out';
-    bodyEl.classList.add(bodyColors[value] || bodyColors['']);
+    const selectColorClasses = {
+         '': ['bg-white', 'text-gray-800', 'border-gray-400', 'focus:ring-emerald-500'],
+        'دخول': ['bg-emerald-500', 'text-white', 'font-semibold', 'border-emerald-600', 'focus:ring-emerald-400'],
+        'انصراف': ['bg-blue-500', 'text-white', 'font-semibold', 'border-blue-600', 'focus:ring-blue-400'],
+        'انصراف مسائي': ['bg-red-500', 'text-white', 'font-semibold', 'border-red-600', 'focus:ring-red-400']
+    };
+
+    // --- List all classes that might be changed for cleanup ---
+    const allBodyClasses = Object.values(bodyColorClasses);
+    const allSelectClasses = [
+        ...Object.values(selectColorClasses).flat(),
+        // Add any legacy classes here to ensure they are removed
+        'border-gray-300', 'border-emerald-500', 'border-blue-500', 'border-red-500' 
+    ];
+
+    // --- Apply new classes ---
+    // 1. Update Body
+    bodyEl.classList.remove(...allBodyClasses);
+    bodyEl.classList.add(bodyColorClasses[value] || bodyColorClasses['']);
     
-    movementSelect.classList.remove('border-gray-300', 'border-emerald-500', 'border-blue-500', 'border-red-500', 'border-emerald-600', 'border-blue-600', 'border-red-600', 'focus:ring-emerald-500', 'focus:ring-blue-500', 'focus:ring-red-500', 'focus:ring-emerald-600', 'focus:ring-blue-600', 'focus:ring-red-600');
-    movementSelect.classList.add(...(selectColors[value] || selectColors['']));
+    // 2. Update Select Element
+    movementSelect.classList.remove(...new Set(allSelectClasses)); // Use Set to remove duplicates
+    movementSelect.classList.add(...(selectColorClasses[value] || selectColorClasses['']));
 }
 
 
