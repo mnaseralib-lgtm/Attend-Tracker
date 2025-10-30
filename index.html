@@ -25,6 +25,15 @@
       .animate-fade-in-down {
         animation: fadeInDown 0.3s ease-out forwards;
       }
+      /* Hide number input arrows */
+      input[type=number]::-webkit-inner-spin-button,
+      input[type=number]::-webkit-outer-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+      }
+      input[type=number] {
+        -moz-appearance: textfield;
+      }
     </style>
 </head>
 <body class="bg-gray-100 transition-colors duration-500 ease-in-out">
@@ -73,7 +82,7 @@
 
                 <div class="manual-entry mt-6 pt-6 border-t">
                     <div class="flex flex-col sm:flex-row items-center justify-center gap-2">
-                       <input id="manualInput" type="text" placeholder="إدخال يدوي - رقم أو اسم" class="w-full sm:w-64 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" />
+                       <input id="manualInput" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="14" placeholder="إدخال يدوي - 14 رقم بحد أقصى" class="w-full sm:w-64 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" />
                         <button id="manualAddBtn" class="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2 font-semibold text-white bg-blue-500 rounded-md shadow-sm hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>
                             <span>إضافة يدوي</span>
@@ -98,7 +107,7 @@ const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzGJy8WInLBIJ
 const LOCAL_STORAGE_KEY = 'attendance_records_v3';
 const DEBOUNCE_MS = 1500;
 const READER_ID = "reader";
-const BEEP_BASE64 = "UklGRuQAAABXQVZFZm10IBAAAAABAAEAgD4AAAB9AAACABAAZGF0YcQAAACAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICA=";
+const BEEP_BASE64 = "UklGRiS9AgBXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABgAZGF0YSS9AgD/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////AAAA//8A/wAAAP//AP8AAAD//wD/AAAA//8A/wAAAP//AP8AAAD//wD/AAAA//8A/wAAAP//AP8AAAD//wD/AAAA//9kAGsA7gHBAgQGDBIZFBoqMDlBVWZ8jZ2/zt/x/gAAA//9bALAA1gH3A/wHDBIdHiguNkBJWGJ6jZ28z9/h/v8AAAD/AAAA//8A/wAAAP//AP8AAAD//wD/AAAA//8A/wAAAP//AP8AAAD//wD/AAAA//8A/wAAAP//AP8AAAD//wD/AAAA//8A/wAAAP//AP8AAAD//wD/AAAA//8A/wAAAP//AP8AAAD//wD/AAAA//8A/wAAAP//AP8AAAD/gnrA1wMHCcQTGxw2QmBkfpaixM7f5/X/AAAA/3N0wNUDPgnCExgcOT5IY2t/mKLGzt7n9f8AAAD/eGfA1gMfCcMTGhs4O0FiaX2WocXO3ufl9/8AAAD/hF3A0gMgCMMRGhs4OkBfa3+Xo8bO3+Tl9v8AAAD/jFXAzgL/BcISGh01OkBfa3+YpcXO3ufl9v8AAAD/nULAvwL4BcMTHB81PEBhaICZpsbP4Ofl+P8AAAD/qmO/ugLzBsQTHh81PEBhaX+bqcjP4ufl+P8AAAD/tmK+tQLvBsQTHh80O0BhaX+cqsjQ4ufl+P8AAAD/vFu9sALnBsQTHh80O0BhaX6drMnR4ufl+P8AAAD/xVa7rgLeBsMSHx80O0BhaX6escnR4ufl+P8AAAD/0FS6qwLYBsMSHx8zO0BhaX6gsMnR4ufl+P8AAAD/2k65pwK9BsMSHx8zO0BhaX6hsMnR4ufl+P8AAAD/5Uu4owK1BsMSHx8zO0BhaX6isMnR4ufl+P8AAAD/70e3nQKqBsMSHx8zO0BhaX6ksMnR4ufl+P8AAAD/+Ua2mgKYBsMSHx8zO0BhaX6lsMnR4ufl+P8AAAD//EW1mAKGBsMSHx8zO0BhaX6msMnR4ufl+P8AAAD/9kC0kQJ/BsMSHx8zO0BhaX6nsMnR4ufl+P8AAAD/6byvggJvBsMSHx8zO0BhaX6psMnR4ufl+P8AAAD/2LmmfwJmBsMSHx8zO0BhaX6ssMnR4ufl+P8AAAD/xLSchAJhBsMSHx8zO0BhaX6uscnR4ufl+P8AAAD/t6yagAJaBsMSHx8zO0BhaX6xscjR4ufl+P8AAAD/pLKXfwJUBsMSHx8zO0BhaX6yscjR4ufl+P8AAAD/k6uVfQJMBr8SHx8zO0BhaX6ysMjR4ufl+P8AAAD/hKeTewJKBr8SHx8zO0BhaX6ysMjR4ufl+P8AAAD/b6OPegJGBr8SHx8zO0BhaX6ysMjR4ufl+P8AAAD/ZqCNfAJABr8SHx8zO0BhaX6xscjR4ufl+P8AAAD/VpiJfgE+Br8SHx8zO0BhaX6xscjR4ufl+P8AAAD/SZuNfwE8Br8SHx8zO0BhaX6xscjR4ufl+P8AAAD/OZ2QggE2Br8SHx8zO0BhaX6xscjR4ufl+P8AAAD/JZ+UigEyBr8SHx8zO0BhaX6xscjR4ufl+P8AAAD//6GZjgEuBr8SHx8zO0BhaX6xscjR4ufl+P8AAAD/aKOkpaanqKmqq6ytrq+wsbKztLW2t7i5uru8vb6/wMHCw8TFxsfIycrLzM3Oz9DR0tPU1dbX2Nna29zd3t/g4eLj5OXm5+jp6uvs7e7v8PHy8/T19vf4+fr7/P3+/w==";
 
 // --- State ---
 let records = [];
@@ -127,25 +136,25 @@ const messageEl = document.getElementById('message');
 function updateThemeColor() {
     const value = movementSelect.value;
     
-    // Define color mappings
+    // Define color mappings with more vivid colors
     const bodyColors = {
         '': 'bg-gray-100',
-        'دخول': 'bg-emerald-50',
-        'انصراف': 'bg-blue-50',
-        'انصراف مسائي': 'bg-red-50'
+        'دخول': 'bg-emerald-100',
+        'انصراف': 'bg-blue-100',
+        'انصراف مسائي': 'bg-red-100'
     };
     const selectColors = {
-        '': ['border-gray-300', 'focus:ring-emerald-500'],
-        'دخول': ['border-emerald-500', 'focus:ring-emerald-500'],
-        'انصراف': ['border-blue-500', 'focus:ring-blue-500'],
-        'انصراف مسائي': ['border-red-500', 'focus:ring-red-500']
+        '': ['border-gray-400', 'focus:ring-emerald-600'],
+        'دخول': ['border-emerald-600', 'focus:ring-emerald-600'],
+        'انصراف': ['border-blue-600', 'focus:ring-blue-600'],
+        'انصراف مسائي': ['border-red-600', 'focus:ring-red-600']
     };
 
     // Reset classes
     bodyEl.className = 'transition-colors duration-500 ease-in-out';
     bodyEl.classList.add(bodyColors[value] || bodyColors['']);
     
-    movementSelect.classList.remove('border-gray-300', 'border-emerald-500', 'border-blue-500', 'border-red-500', 'focus:ring-emerald-500', 'focus:ring-blue-500', 'focus:ring-red-500');
+    movementSelect.classList.remove('border-gray-300', 'border-emerald-500', 'border-blue-500', 'border-red-500', 'border-emerald-600', 'border-blue-600', 'border-red-600', 'focus:ring-emerald-500', 'focus:ring-blue-500', 'focus:ring-red-500', 'focus:ring-emerald-600', 'focus:ring-blue-600', 'focus:ring-red-600');
     movementSelect.classList.add(...(selectColors[value] || selectColors['']));
 }
 
@@ -303,9 +312,11 @@ function startScanner() {
                     isScanning = true;
                     updateUIState();
                     const track = html5QrCode.getRunningTrack();
-                    const capabilities = track.getCapabilities();
-                    if (capabilities.torch) {
-                        flashBtn.classList.remove('hidden');
+                    if (track) {
+                        const capabilities = track.getCapabilities();
+                        if (capabilities && capabilities.torch) {
+                            flashBtn.classList.remove('hidden');
+                        }
                     }
                 })
                 .catch(err => {
@@ -353,7 +364,7 @@ function toggleFlash() {
 function handleManualAdd() {
     const value = manualInput.value.trim();
     if (!value) {
-        showMessage('أدخل رقم أو اسم صالح', 'error');
+        showMessage('أدخل رقمًا صالحًا', 'error');
         return;
     }
     if (addRecord(value, 'Manual')) {
@@ -428,6 +439,11 @@ document.addEventListener('DOMContentLoaded', () => {
     manualAddBtn.addEventListener('click', handleManualAdd);
     exportBtn.addEventListener('click', exportToCsv);
     movementSelect.addEventListener('change', updateThemeColor);
+
+    // Enforce numbers only for manual input
+    manualInput.addEventListener('input', () => {
+        manualInput.value = manualInput.value.replace(/[^0-9]/g, '');
+    });
     
     loadLocally();
     updateThemeColor(); // Set initial theme
