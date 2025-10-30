@@ -415,13 +415,26 @@ function stopScanner() {
 }
 
 function toggleFlash() {
-    if (isScanning && html5QrCode && canUseFlash) {
-        isFlashOn = !isFlashOn;
-        html5QrCode.applyVideoConstraints({
-            advanced: [{ torch: isFlashOn }]
-        });
-        updateFlashUI();
+    if (!isScanning || !html5QrCode || !canUseFlash) {
+        return;
     }
+
+    const newFlashState = !isFlashOn;
+
+    // applyVideoConstraints returns a Promise. We must handle it.
+    html5QrCode.applyVideoConstraints({
+        advanced: [{ torch: newFlashState }]
+    })
+    .then(() => {
+        // Only update the state and UI on success.
+        isFlashOn = newFlashState;
+        updateFlashUI();
+    })
+    .catch(err => {
+        console.error("Failed to apply torch constraints:", err);
+        showMessage('خطأ: لم يتمكن من تشغيل الفلاش.', 'error');
+        // If it failed, the state wasn't changed, so no need to revert.
+    });
 }
 
 function toggleMute() {
