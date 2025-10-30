@@ -82,7 +82,7 @@
                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><circle cx="12" cy="12" r="10" /><rect width="6" height="6" x="9" y="9" /></svg>
                             <span>Stop</span>
                         </button>
-                         <button id="flashBtn" class="hidden items-center justify-center p-2.5 font-semibold text-white bg-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-offset-2 transition-all duration-300 disabled:bg-gray-400 disabled:cursor-not-allowed">
+                         <button id="flashBtn" class="flex items-center justify-center p-2.5 font-semibold text-white bg-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-offset-2 transition-all duration-300 disabled:bg-gray-400 disabled:cursor-not-allowed" disabled>
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
                                 <path id="flashPath" d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"></path>
                             </svg>
@@ -194,15 +194,11 @@ function updateUIState() {
         readerEl.style.minHeight = '250px';
         readerEl.classList.add('border-emerald-500');
         readerEl.classList.remove('border-gray-300');
-        if (canUseFlash) {
-             flashBtn.classList.remove('hidden');
-        }
     } else {
         readerEl.style.minHeight = '0px';
         readerEl.innerHTML = '';
         readerEl.classList.remove('border-emerald-500');
         readerEl.classList.add('border-gray-300');
-        flashBtn.classList.add('hidden');
         isFlashOn = false;
         canUseFlash = false;
         updateFlashUI();
